@@ -115,7 +115,7 @@ def main():
     p.add_argument("--logline", default="")
     p.add_argument("--index", default="")
     p.add_argument("--cover", default="")
-    p.add_argument("--no-art", action="store_true", help="show the seat icon instead of generated art")
+    p.add_argument("--art", action="store_true", help="fill the frame with generated Top Row Films artwork")
     a = p.parse_args()
 
     img = Image.new("RGB", (W, H), BG)
@@ -131,7 +131,7 @@ def main():
     # Cover-art frame (2:3) on the left
     top = 258
     cw, ch = 380, 570
-    cover_frame(img, d, M, top, cw, ch, a.cover, a.title, a.genre, not a.no_art)
+    cover_frame(img, d, M, top, cw, ch, a.cover, a.title, a.genre, a.art)
 
     # Right column: status, title, director
     rx = M + cw + 44
