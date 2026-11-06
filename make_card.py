@@ -9,12 +9,14 @@ Usage:
 Without it, the cover-art frame shows a branded placeholder.
 """
 import argparse
+import sys
 import glob
 import os
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
 W, H = 1080, 1350
 M = 72
 
@@ -84,10 +86,17 @@ def paste_asset(img, name, box_w, box_h, x, y, opacity=1.0, center=False):
     return a.height
 
 
-def cover_frame(img, d, x, y, w, h, cover):
+def cover_frame(img, d, x, y, w, h, cover, title="", genre="", art=True):
     if cover and os.path.exists(cover):
-        art = ImageOps.fit(Image.open(cover).convert("RGB"), (w, h), Image.LANCZOS)
-        img.paste(art, (x, y))
+        img.paste(ImageOps.fit(Image.open(cover).convert("RGB"), (w, h), Image.LANCZOS), (x, y))
+    elif art:
+        from cover_art import make_cover
+        img.paste(make_cover(title, genre, w, h), (x, y))
+        cf = font("semi", 18)
+        label = "ARTWORK: TOP ROW FILMS"
+        lw = d.textlength(label, font=cf)
+        d.rectangle((x + w - lw - 24, y + h - 36, x + w, y + h), fill=BG)
+        d.text((x + w - lw - 12, y + h - 30), label, font=cf, fill=MUTED)
     else:
         d.rectangle((x, y, x + w, y + h), fill=PANEL)
         iw = int(w * 0.46)
@@ -106,6 +115,7 @@ def main():
     p.add_argument("--logline", default="")
     p.add_argument("--index", default="")
     p.add_argument("--cover", default="")
+    p.add_argument("--no-art", action="store_true", help="show the seat icon instead of generated art")
     a = p.parse_args()
 
     img = Image.new("RGB", (W, H), BG)
@@ -121,7 +131,7 @@ def main():
     # Cover-art frame (2:3) on the left
     top = 258
     cw, ch = 380, 570
-    cover_frame(img, d, M, top, cw, ch, a.cover)
+    cover_frame(img, d, M, top, cw, ch, a.cover, a.title, a.genre, not a.no_art)
 
     # Right column: status, title, director
     rx = M + cw + 44
