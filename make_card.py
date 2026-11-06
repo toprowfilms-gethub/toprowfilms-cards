@@ -128,42 +128,37 @@ def main():
         d.text((W - M - d.textlength(a.index, font=f), 70), a.index, font=f, fill=MUTED)
     d.line((M, 214, W - M, 214), fill=RULE, width=2)
 
-    # Cover-art frame (2:3) on the left
-    top = 258
-    cw, ch = 380, 570
-    cover_frame(img, d, M, top, cw, ch, a.cover, a.title, a.genre, a.art)
-
-    # Right column: status, title, director
-    rx = M + cw + 44
-    rw = W - M - rx
-    y = top
+    # Full-width body: status, title, director, logline
+    y = 266
+    bw = W - 2 * M
     if a.status:
-        sf = font("bold", 26)
-        s = a.status.upper()
-        tw = min(d.textlength(s, font=sf), rw - 48)
-        d.rounded_rectangle((rx, y, rx + tw + 48, y + 54), radius=27, fill=GOLD)
-        d.text((rx + 24, y + 12), s, font=sf, fill=PILL_TEXT)
-        y += 86
+        sf = font("bold", 28)
+        st = a.status.upper()
+        tw = min(d.textlength(st, font=sf), bw - 52)
+        d.rounded_rectangle((M, y, M + tw + 52, y + 58), radius=29, fill=GOLD)
+        d.text((M + 26, y + 13), st, font=sf, fill=PILL_TEXT)
+        y += 100
 
+    limit = 1040
     dlines, dsize, df = [], 0, None
     if a.director:
-        df, dlines, dsize = fit(d, f"Dir. {a.director}", "semi", rw, 100, 2, 38, 26, 1.25)
-    dir_h = (22 + len(dlines) * int(dsize * 1.25)) if dlines else 0
-    tf, tlines, tsize = fit(d, a.title.upper(), "black", rw, top + ch - y - dir_h, 5, 104, 40)
-    lh = int(tsize * 1.04)
-    for line in tlines:
-        d.text((rx, y), line, font=tf, fill=INK)
-        y += lh
-    y += 22
-    if dlines:
-        for line in dlines:
-            d.text((rx, y), line, font=df, fill=GOLD)
-            y += int(dsize * 1.25)
-
-    # Logline, full width under the frame
-    y = top + ch + 40
+        df, dlines, dsize = fit(d, f"Dir. {a.director}", "semi", bw, 110, 2, 46, 30, 1.2)
+    llines, lsize, lf = [], 0, None
     if a.logline:
-        lf, llines, lsize = fit(d, a.logline, "reg", W - 2 * M, 100, 2, 36, 28, 1.35)
+        lf, llines, lsize = fit(d, a.logline, "reg", bw, 150, 3, 38, 28, 1.35)
+    below = (28 + len(dlines) * int(dsize * 1.2) if dlines else 0) + (24 + len(llines) * int(lsize * 1.35) if llines else 0)
+    tf, tlines, tsize = fit(d, a.title.upper(), "black", bw, limit - y - below, 4, 150, 56)
+    lh = int(tsize * 1.02)
+    for line in tlines:
+        d.text((M, y), line, font=tf, fill=INK)
+        y += lh
+    if dlines:
+        y += 28
+        for line in dlines:
+            d.text((M, y), line, font=df, fill=GOLD)
+            y += int(dsize * 1.2)
+    if llines:
+        y += 24
         for line in llines:
             d.text((M, y), line, font=lf, fill=MUTED)
             y += int(lsize * 1.35)
